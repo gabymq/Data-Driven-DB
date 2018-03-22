@@ -9,11 +9,19 @@ import java.sql.*;
 import java.util.concurrent.TimeUnit;
 
 public class RegisterUsers {
-    WebDriver webdriver;
-    String baseUrl = "http://newtours.demoaut.com/";
-    String xpathLoc = ".//*[contains(text(),'Note: Your user name is')]";
+    private WebDriver webdriver;
+    private String baseUrl = "http://newtours.demoaut.com/";
+    private String xpathLoc = ".//*[contains(text(),'Note: Your user name is')]";
+    private String jdbcDriver = "com.mysql.cj.jdbc.Driver";
+    private String dataBaseUrl = "jdbc:mysql://localhost:3306/demo?useSSL=true&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    private String user = "root";
+    private String password = "admin";
+    private Connection conn = null;
+    private Statement stmt;
+    private ResultSet resultSet;
 
-    public WebDriver getDriver(){
+
+    private WebDriver getDriver(){
         if(webdriver == null){
             System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir")+"\\drivers\\chromedriver.exe");
             webdriver = new ChromeDriver();
@@ -21,7 +29,7 @@ public class RegisterUsers {
         return webdriver;
     }
 
-    public void navigateTo(){
+    private void navigateTo(){
         getDriver().get(baseUrl);
         getDriver().manage().window().maximize();
         getDriver().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
@@ -31,11 +39,35 @@ public class RegisterUsers {
     public Object[][] mySQL_Data()
     {
         int rowCount = 0;
-        int columnCount = 0;
+        int columnCount;
         String myData[][] = null;
 
         try{
+            Class.forName(jdbcDriver).newInstance();
+            conn = DriverManager.getConnection(dataBaseUrl, user, password);
 
+            stmt = conn.createStatement();
+            resultSet = stmt.executeQuery("SELECT * FROM demo.userinfo;");
+
+            ResultSetMetaData rsMeta = resultSet.getMetaData();
+            columnCount = rsMeta.getColumnCount();
+
+            while (resultSet.next())
+                rowCount++;
+
+            myData = new String [rowCount][columnCount];
+
+            resultSet.beforeFirst();
+
+            for (int row = 0; row<rowCount;row++){
+                resultSet.next();
+                for(int col = 1; col<=columnCount;col++){
+                    myData[row][col-1] = resultSet.getString(col);
+                }
+            }
+
+            stmt.close();
+            conn.close();
 
         }catch(Exception e){
             System.err.println(e.getMessage());
@@ -44,12 +76,12 @@ public class RegisterUsers {
     }
 
     @BeforeTest
-    public void setUp() throws Exception {
+    public void setUp(){
         navigateTo();
     }
 
     @AfterTest
-    public void tearDown() throws Exception {
+    public void tearDown(){
         getDriver().quit();
     }
 
