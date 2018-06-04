@@ -6,11 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="DataDrivenDB" />
+        <module name="data-driven-db" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="DataDrivenDB" target="1.7" />
-    </bytecodeTargetLevel>
   </component>
 </project>
